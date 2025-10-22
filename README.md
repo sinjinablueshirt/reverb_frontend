@@ -41,7 +41,7 @@ npm run build
 
 [click here for the recording](https://youtu.be/BEZr5AArdlI)
 
-Iʻm sorry the recording is so long! I wanted to illustrate the two full user journeys of this app. For the sake of time, I diverged from the specific story I crafted in the User Journeys section below, but the ideas and flow of user actions are the same.
+Iʻm sorry the recording is so long! I wanted to illustrate the two full user journeys of this app. For the sake of time, I diverged from the specific details of the story I crafted in the User Journeys section below, but the ideas and flow of user actions are the same.
 
 ## User Journeys
 
@@ -75,6 +75,8 @@ Bulbasaur ends up feeling not only accomplished for helping someone else out, bu
 
 ## Notes
 Because Reverb serves both composers and commenters, I included two journeys to illustrate the app’s features from each perspective. I know the end result is super long, but I hope it adequately describes the journey of the users.
+
+figuring out GCS was a pain :(
 
 ## Big changes (so far)
 1. added queries to concepts in order to access things. initially queries took in arguments like normal but had to change so they took in JSON-like objects (and returned json objects)
