@@ -39,7 +39,7 @@ npm run build
 
 ## Screen Recording
 
-[click here for the recording](/src/assets/screen-recording.mov)
+[click here for the recording](https://youtu.be/BEZr5AArdlI)
 
 Iʻm sorry the recording is so long! I wanted to illustrate the two full user journeys of this app. For the sake of time, I diverged from the specific story I crafted in the User Journeys section below, but the ideas and flow of user actions are the same.
 
