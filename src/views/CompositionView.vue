@@ -1,15 +1,44 @@
 <template>
   <div v-if="composition" class="composition-container">
-    <div class="composition-header">
-      <h1>{{ composition.fileName || 'Composition' }}</h1>
-      <p><strong>Description:</strong> {{ composition.description }}</p>
-      <p><strong>Tags:</strong> {{ composition.tags.join(', ') }}</p>
-    </div>
-
     <div class="content-wrapper">
+      <!-- Left Info Section -->
+      <div class="info-section">
+        <h1>{{ composition.title || 'Composition' }}</h1>
+        <div class="info-item creator-item">
+          <strong>Creator:</strong>
+          <p>{{ compositionOwnerName || 'Loading...' }}</p>
+        </div>
+        <div class="info-item">
+          <strong>Description:</strong>
+          <p>{{ composition.description || 'No description provided' }}</p>
+        </div>
+        <div class="info-item">
+          <strong>Tags:</strong>
+          <div class="composition-tags">
+            <span v-for="tag in composition.tags.filter(t => t !== 'public')" :key="tag" class="tag">{{ tag }}</span>
+          </div>
+        </div>
+
+        <!-- Public/Private Toggle (Owner Only) -->
+        <div v-if="isOwner" class="info-item visibility-toggle">
+          <strong>Visibility:</strong>
+          <div class="toggle-container">
+            <label class="toggle-switch">
+              <input
+                type="checkbox"
+                :checked="isPublic"
+                @change="toggleVisibility"
+              />
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label">{{ isPublic ? 'Public' : 'Private' }}</span>
+          </div>
+        </div>
+      </div>
+
       <!-- PDF Viewer Section -->
       <div class="pdf-section">
-        <iframe v-if="viewUrl" :src="viewUrl" class="pdf-iframe"></iframe>
+        <iframe v-if="viewUrl" :src="viewUrl + '#toolbar=0&navpanes=0&scrollbar=0'" class="pdf-iframe"></iframe>
         <div v-else-if="loading" class="placeholder">
           <p>Loading file preview...</p>
         </div>
@@ -106,6 +135,9 @@ const newCommentText = ref('');
 const newCommentTags = ref('');
 const suggestingTags = ref(false);
 const userNames = ref({});
+const compositionOwnerName = ref('');
+const isPublic = ref(false);
+const isOwner = ref(false);
 
 const loadComposition = async () => {
   const compositionId = route.params.id;
@@ -123,6 +155,18 @@ const loadComposition = async () => {
   if (composition.value) {
     await commentStore.registerResource(compositionId);
     await commentStore.fetchComments(compositionId);
+
+    // Check if current user is the owner
+    isOwner.value = authStore.user === composition.value.owner;
+
+    // Check if composition is public (has "public" tag)
+    isPublic.value = composition.value.tags.includes('public');
+
+    // Load the composition owner's name
+    if (composition.value.owner) {
+      await loadUserName(composition.value.owner);
+      compositionOwnerName.value = getUserName(composition.value.owner);
+    }
 
     // Load usernames for all commenters
     for (const comment of commentStore.comments) {
@@ -227,6 +271,47 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
 };
 
+const toggleVisibility = async () => {
+  if (!composition.value || !isOwner.value) return;
+
+  const compositionId = route.params.id;
+  let updatedTags = [...composition.value.tags];
+
+  console.log('Current tags:', updatedTags);
+  console.log('Current isPublic:', isPublic.value);
+
+  // Toggle the public tag
+  if (isPublic.value) {
+    // Remove public tag
+    updatedTags = updatedTags.filter(tag => tag !== 'public');
+    console.log('Removing public tag, new tags:', updatedTags);
+  } else {
+    // Add public tag
+    if (!updatedTags.includes('public')) {
+      updatedTags.push('public');
+      console.log('Adding public tag, new tags:', updatedTags);
+    }
+  }
+
+  // Update the composition
+  const compositionData = {
+    ...composition.value,
+    tags: updatedTags,
+  };
+
+  console.log('Updating composition with data:', compositionData);
+  await compositionStore.updateComposition({ id: compositionId, data: compositionData });
+
+  if (!compositionStore.error) {
+    // Update local state
+    isPublic.value = !isPublic.value;
+    composition.value.tags = updatedTags;
+    console.log('Update successful, new isPublic:', isPublic.value);
+  } else {
+    console.error('Update failed with error:', compositionStore.error);
+  }
+};
+
 onMounted(loadComposition);
 
 watch(() => route.params.id, loadComposition);
@@ -239,25 +324,175 @@ watch(() => route.params.id, loadComposition);
   flex-direction: column;
 }
 
-.composition-header {
-  margin-bottom: 1rem;
-}
-
 .content-wrapper {
   display: flex;
   gap: 2rem;
-  height: calc(100vh - 200px);
-  min-height: 600px;
+  justify-content: center;
+  align-items: flex-start;
 }
 
+/* Left Info Section */
+.info-section {
+  flex: 0 0 320px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(253, 245, 232, 0.95) 100%);
+  border: 2px solid #8768c8;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 6px 20px rgba(135, 104, 200, 0.25);
+  backdrop-filter: blur(10px);
+}
+
+.info-section h1 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 2em;
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 50%, #feb503 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.info-item {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  border-left: 4px solid #8768c8;
+}
+
+.creator-item {
+  background: linear-gradient(135deg, rgba(135, 104, 200, 0.15) 0%, rgba(169, 74, 102, 0.15) 100%);
+  border-left: 4px solid #feb503;
+}
+
+.creator-item p {
+  font-weight: 600;
+  color: #3d5d7e;
+  font-size: 1.1em;
+}
+
+.info-item:last-child {
+  margin-bottom: 0;
+}
+
+.info-item strong {
+  display: block;
+  color: #3d5d7e;
+  margin-bottom: 0.75rem;
+  font-size: 1em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-item p {
+  margin: 0;
+  color: #1a1a1a;
+  line-height: 1.7;
+  font-size: 1.05em;
+}
+
+.composition-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.composition-tags .tag {
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 3px 8px rgba(135, 104, 200, 0.3);
+  transition: all 0.3s ease;
+}
+
+.composition-tags .tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(135, 104, 200, 0.4);
+}
+
+/* Visibility Toggle */
+.visibility-toggle {
+  border-top: 2px solid #8768c8;
+  padding-top: 1.5rem;
+  margin-top: 1rem;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 100%);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(26px);
+}
+
+.toggle-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #3d5d7e;
+}
+
+/* PDF Section */
 .pdf-section {
   flex: 1;
+  max-width: 800px;
   min-width: 0;
-  border: 2px solid #98fb98;
-  border-radius: 4px;
+  height: 800px;
+  border: 2px solid #8a9eaf;
+  border-radius: 16px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 4px 12px rgba(61, 93, 126, 0.15);
 }
 
 .pdf-iframe {
@@ -284,7 +519,7 @@ watch(() => route.params.id, loadComposition);
 .comments-section h2 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: #2e8b57;
+  color: #3d5d7e;
 }
 
 .add-comment {
@@ -295,8 +530,8 @@ watch(() => route.params.id, loadComposition);
 .add-comment textarea {
   width: 100%;
   padding: 0.5rem;
-  border: 2px solid #98fb98;
-  border-radius: 4px;
+  border: 2px solid #8a9eaf;
+  border-radius: 12px;
   font-family: inherit;
   margin-bottom: 0.5rem;
   resize: vertical;
@@ -314,53 +549,64 @@ watch(() => route.params.id, loadComposition);
 }
 
 .suggest-btn {
-  background-color: #3cb371;
+  background: linear-gradient(135deg, #3d5d7e 0%, #8768c8 100%);
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: 12px;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(61, 93, 126, 0.3);
 }
 
 .suggest-btn:hover:not(:disabled) {
-  background-color: #2e8b57;
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(135, 104, 200, 0.4);
 }
 
 .suggest-btn:disabled {
-  background-color: #ccc;
+  background: #8a9eaf;
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .add-comment button {
-  background-color: #3cb371;
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 100%);
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: 12px;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .add-comment button:hover:not(:disabled) {
-  background-color: #2e8b57;
+  background: linear-gradient(135deg, #a94a66 0%, #feb503 100%);
+  transform: translateY(-1px);
 }
 
 .add-comment button:disabled {
-  background-color: #ccc;
+  background: #8a9eaf;
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .error {
-  color: #ff0000;
+  color: #a94a66;
   margin-top: 0.5rem;
+  background-color: #ffe6f0;
+  padding: 0.5rem;
+  border-radius: 8px;
 }
 
 .login-prompt {
   padding: 1rem;
-  background-color: #f0fff0;
-  border: 1px solid #98fb98;
-  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 2px solid #8a9eaf;
+  border-radius: 12px;
   margin-bottom: 1rem;
   flex-shrink: 0;
 }
@@ -373,28 +619,37 @@ watch(() => route.params.id, loadComposition);
 }
 
 .comment {
-  background-color: #f0fff0;
-  border: 1px solid #98fb98;
-  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 2px solid #8a9eaf;
+  border-radius: 12px;
   padding: 1rem;
   margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(61, 93, 126, 0.1);
+}
+
+.comment:hover {
+  border-color: #8768c8;
+  box-shadow: 0 4px 10px rgba(135, 104, 200, 0.2);
 }
 
 .comment-header {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.5rem;
-  color: #2e8b57;
+  color: #3d5d7e;
+  font-weight: 600;
 }
 
 .comment-date {
   font-size: 0.9rem;
-  color: #666;
+  color: #8a9eaf;
 }
 
 .comment-text {
   margin: 0.5rem 0;
   white-space: pre-wrap;
+  color: #1a1a1a;
 }
 
 .comment-tags {
@@ -405,16 +660,17 @@ watch(() => route.params.id, loadComposition);
 }
 
 .comment-tags .tag {
-  background-color: #3cb371;
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 100%);
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
   font-size: 0.85rem;
   font-weight: 500;
+  box-shadow: 0 2px 4px rgba(135, 104, 200, 0.2);
 }
 
 .delete-btn {
-  background-color: #ff6b6b;
+  background: linear-gradient(135deg, #a94a66 0%, #d45876 100%);
   color: white;
   border: none;
   padding: 0.25rem 0.5rem;

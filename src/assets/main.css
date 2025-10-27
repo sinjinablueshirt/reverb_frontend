@@ -5,27 +5,292 @@
   margin: 0;
   padding: 0;
   font-weight: normal;
-  background-color: #f0fff0; /* Honeydew */
+  background:
+    radial-gradient(circle at 20% 30%, rgba(254, 181, 3, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(135, 104, 200, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 50% 90%, rgba(169, 74, 102, 0.06) 0%, transparent 50%),
+    linear-gradient(180deg, #fef9f0 0%, #f8f3ea 50%, #fdf5e8 100%);
   min-height: 100vh;
+  position: relative;
+}
+
+#app::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(135, 104, 200, 0.02) 2px, rgba(135, 104, 200, 0.02) 4px),
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(135, 104, 200, 0.02) 2px, rgba(135, 104, 200, 0.02) 4px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#app > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Global Input and Textarea Styling */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="file"],
+textarea,
+select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #8a9eaf;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 15px;
+  background-color: white;
+  color: #1a1a1a;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(61, 93, 126, 0.1);
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #8768c8;
+  box-shadow: 0 4px 12px rgba(135, 104, 200, 0.2);
+  background-color: #ffffff;
+}
+
+input[type="text"]:hover,
+input[type="password"]:hover,
+input[type="email"]:hover,
+textarea:hover,
+select:hover {
+  border-color: #3d5d7e;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+input[type="file"] {
+  padding: 10px;
+  cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  margin-right: 12px;
+  transition: all 0.3s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background: linear-gradient(135deg, #a94a66 0%, #feb503 100%);
+  transform: translateY(-1px);
+}
+
+/* Global Button Styling */
+button {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(135, 104, 200, 0.3);
+}
+
+button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #a94a66 0%, #feb503 100%);
+  box-shadow: 0 5px 15px rgba(169, 74, 102, 0.4);
+  transform: translateY(-2px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(135, 104, 200, 0.3);
+}
+
+button:disabled {
+  background: #8a9eaf;
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+/* Global Box/Card Styling */
+.card,
+.content-box {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 2px solid #8a9eaf;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(61, 93, 126, 0.15);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.card:hover,
+.content-box:hover {
+  box-shadow: 0 6px 20px rgba(135, 104, 200, 0.2);
+  border-color: #8768c8;
+}
+
+/* Form Styling */
+form {
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 2px solid #8a9eaf;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(61, 93, 126, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+form input,
+form textarea,
+form select {
+  margin: 0;
+}
+
+form button {
+  align-self: flex-start;
+  min-width: 120px;
+}
+
+/* Label Styling */
+label {
+  display: block;
+  margin-bottom: 6px;
+  color: #3d5d7e;
+  font-weight: 500;
+}
+
+/* Checkbox Styling */
+input[type="checkbox"] {
+  width: auto;
+  cursor: pointer;
+  accent-color: #8768c8;
+  transform: scale(1.2);
+}
+
+/* List Styling */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+ul li {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 2px solid #8a9eaf;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(61, 93, 126, 0.1);
+}
+
+ul li:hover {
+  box-shadow: 0 4px 12px rgba(135, 104, 200, 0.2);
+  transform: translateX(4px);
+  border-color: #8768c8;
+  background-color: rgba(255, 255, 255, 1);
+}
+
+/* Horizontal Rule Styling */
+hr {
+  border: none;
+  border-top: 2px solid #8a9eaf;
+  margin: 24px 0;
+  border-radius: 2px;
+  opacity: 0.5;
+}
+
+/* Error and Message Styling */
+.error {
+  background-color: #ffe6f0;
+  border: 2px solid #a94a66;
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #721536;
+  margin-top: 12px;
+}
+
+.success {
+  background-color: #f0f8ff;
+  border: 2px solid #3d5d7e;
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #1a2f4a;
+  margin-top: 12px;
+}
+
+/* Heading Styling */
+h1, h2, h3, h4, h5, h6 {
+  color: #3d5d7e;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 2.5em;
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 50%, #feb503 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+h2 {
+  font-size: 2em;
+  color: #3d5d7e;
 }
 
 a,
 .green {
   text-decoration: none;
-  color: #3cb371; /* MediumSeaGreen */
-  transition: 0.4s;
-  padding: 3px;
+  color: #8768c8;
+  transition: all 0.3s ease;
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: inline-block;
 }
 
 @media (hover: hover) {
   a:hover {
-    background-color: #98fb98; /* PaleGreen */
+    background-color: rgba(135, 104, 200, 0.15);
+    color: #a94a66;
   }
 }
 
+/* Router Link Button Styling */
+a button {
+  margin: 0;
+}
+
 body {
-  background-color: #f0fff0; /* Honeydew */
-  color: #2f4f4f; /* DarkSlateGray */
+  background: linear-gradient(180deg, #fef9f0 0%, #fdf5e8 100%);
+  color: #1a1a1a;
+}
+
+/* Content Container Styling */
+#app > div {
+  width: 100%;
+  margin: 0;
+  padding: 20px;
 }
 
 @media (min-width: 1024px) {
@@ -34,6 +299,10 @@ body {
   }
 
   #app {
-    padding: 2rem;
+    padding: 0;
+  }
+
+  #app > div {
+    padding: 40px;
   }
 }

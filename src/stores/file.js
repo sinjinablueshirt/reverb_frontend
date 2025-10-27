@@ -9,7 +9,7 @@ export const useFileStore = defineStore('file', {
     error: null,
   }),
   actions: {
-    async uploadFile(file) {
+    async uploadFile(file, title) {
       this.error = null;
       const authStore = useAuthStore();
       console.log('file to upload:', file);
@@ -55,6 +55,7 @@ export const useFileStore = defineStore('file', {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             fileName: file.name,
+            title: title,
             gcsObjectName,
             owner: authStore.user,
           }),

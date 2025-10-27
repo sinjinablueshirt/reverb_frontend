@@ -105,6 +105,7 @@ export const useCompositionStore = defineStore('composition', {
               id: file._id,
               url: file.url,
               owner: file.owner,
+              title: file.title || file.fileName,
               fileName: file.fileName,
               gcsObjectName: file.gcsObjectName,
               description: registryData.description,
@@ -146,6 +147,7 @@ export const useCompositionStore = defineStore('composition', {
               id: file._id,
               url: file.url,
               owner: file.owner,
+              title: file.title || file.fileName,
               fileName: file.fileName,
               gcsObjectName: file.gcsObjectName,
               description: registryData.description || 'No description',
@@ -160,6 +162,68 @@ export const useCompositionStore = defineStore('composition', {
       this.currentComposition = composition || null;
       if (!this.currentComposition) {
         this.error = "Composition not found.";
+      }
+    },
+    async updateComposition({ id, data }) {
+      const authStore = useAuthStore();
+      if (!authStore.user) {
+        this.error = 'User must be logged in to update a composition.';
+        return;
+      }
+
+      try {
+        const fileId = id;
+
+        // Get the registry for this resource
+        const registryResponse = await fetch(`${API_URL}/MusicTagging/_getRegistryByResource`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ resource: fileId }),
+        });
+        const registryData = await registryResponse.json();
+
+        if (registryData.error) {
+          this.error = registryData.error;
+          return;
+        }
+
+        const registryId = registryData._id;
+
+        // Update tags: remove old tags and add new ones
+        if (data.tags !== undefined) {
+          const currentTags = registryData.tags || [];
+
+          // Remove tags that are no longer present
+          for (const tag of currentTags) {
+            if (!data.tags.includes(tag)) {
+              await fetch(`${API_URL}/MusicTagging/removeTag`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ registry: registryId, tag }),
+              });
+            }
+          }
+
+          // Add new tags
+          for (const tag of data.tags) {
+            if (tag && !currentTags.includes(tag)) {
+              await fetch(`${API_URL}/MusicTagging/addTag`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ registry: registryId, tag }),
+              });
+            }
+          }
+        }
+
+        this.error = null;
+
+        // Refresh the composition to get updated data
+        await this.fetchComposition(id);
+
+      } catch (error) {
+        this.error = error.message;
+        console.error('Error updating composition:', error);
       }
     }
   },

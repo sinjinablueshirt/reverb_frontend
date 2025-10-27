@@ -18,11 +18,13 @@ const authStore = useAuthStore()
 <style scoped>
 .app-layout {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
 }
 
 main {
   flex-grow: 1;
   padding: 1rem;
+  width: 100%;
 }
 </style>

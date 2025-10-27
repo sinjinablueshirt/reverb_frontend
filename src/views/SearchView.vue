@@ -1,26 +1,52 @@
 <template>
-  <div>
-    <h1>Search Results</h1>
-    <div v-if="searchResults.length">
-      <ul class="search-results-list">
-        <li v-for="composition in enrichedResults" :key="composition._id" class="result-item">
-          <router-link :to="`/composition/${composition.resource}`" class="result-link">
-            <div class="result-title">{{ composition.fileName || 'Untitled Composition' }}</div>
-            <div class="result-meta">
-              <span class="result-author">by {{ composition.ownerName || 'Loading...' }}</span>
-            </div>
-            <div class="result-description">{{ composition.description || 'No description' }}</div>
-            <div class="result-tags">
-              <span class="tag" v-for="tag in composition.tags" :key="tag">{{ tag }}</span>
-            </div>
-          </router-link>
-        </li>
-      </ul>
+  <div class="search-view">
+    <div class="search-header">
+      <h1>🎵 Search Compositions</h1>
+      <div class="search-bar-container">
+        <input
+          type="text"
+          v-model="searchQuery"
+          @keyup.enter="performSearch"
+          placeholder="Search by tags (comma-separated)..."
+          class="search-input"
+        />
+        <button @click="performSearch" class="search-button">
+          <span class="search-icon">🔍</span> Search
+        </button>
+      </div>
+      <p class="search-hint" v-if="searchQuery">
+        Searching for: <span class="tag-preview" v-for="tag in searchQuery.split(',')" :key="tag">{{ tag.trim() }}</span>
+      </p>
     </div>
-    <div v-else>
+
+    <div v-if="searchResults.length" class="results-container">
+      <div class="results-header">
+        <h2>Found {{ enrichedResults.length }} composition{{ enrichedResults.length !== 1 ? 's' : '' }}</h2>
+      </div>
+      <div class="results-grid">
+        <router-link
+          v-for="composition in enrichedResults"
+          :key="composition._id"
+          :to="`/composition/${composition.resource}`"
+          class="result-card"
+        >
+          <div class="result-card-header">
+            <div class="result-title">{{ composition.title || 'Untitled Composition' }}</div>
+            <div class="result-author">by {{ composition.ownerName || 'Loading...' }}</div>
+          </div>
+          <div class="result-description">{{ composition.description || 'No description' }}</div>
+          <div class="result-tags">
+            <span class="tag" v-for="tag in composition.tags.filter(t => t !== 'public')" :key="tag">{{ tag }}</span>
+          </div>
+        </router-link>
+      </div>
+    </div>
+    <div v-else class="no-results">
+      <div class="no-results-icon">🎼</div>
       <p>No compositions found for the given tags.</p>
+      <p class="no-results-hint">Try different tags or create your own composition!</p>
     </div>
-    <div v-if="error">{{ error }}</div>
+    <div v-if="error" class="error">{{ error }}</div>
   </div>
 </template>
 
@@ -38,6 +64,7 @@ export default {
     return {
       enrichedResults: [],
       userNames: {},
+      searchQuery: '',
     };
   },
   computed: {
@@ -45,6 +72,20 @@ export default {
   },
   methods: {
     ...mapActions(useCompositionStore, ['searchCompositions']),
+
+    performSearch() {
+      // Allow empty search to get all public compositions
+      const tags = this.searchQuery.trim()
+        ? this.searchQuery.split(',').map(tag => tag.trim()).filter(tag => tag)
+        : [];
+
+      // Automatically add "public" tag to filter for public compositions only
+      if (!tags.includes('public')) {
+        tags.push('public');
+      }
+
+      this.$router.push({ name: 'search', query: { tags: tags.join(',') } });
+    },
 
     async enrichSearchResults() {
       const fileStore = useFileStore();
@@ -64,6 +105,7 @@ export default {
             console.log('Fetched owner name:', ownerName);
             enriched.push({
               ...result,
+              title: file.title || file.fileName,
               fileName: file.fileName,
               owner: file.owner,
               ownerName: ownerName,
@@ -122,77 +164,267 @@ export default {
         }
       },
     },
+    '$route.query.tags': {
+      immediate: true,
+      handler(newTags) {
+        if (newTags) {
+          // Remove "public" from display but ensure it's in the actual search
+          const tagArray = newTags.split(',');
+          const displayTags = tagArray.filter(tag => tag !== 'public');
+          this.searchQuery = displayTags.join(', ');
+
+          // Ensure "public" is in the search tags
+          if (!tagArray.includes('public')) {
+            tagArray.push('public');
+          }
+          this.searchCompositions(tagArray);
+        }
+      },
+    },
   },
   created() {
-    const tags = this.$route.query.tags;
-    if (tags) {
-      this.searchCompositions(tags.split(','));
-    }
+    // Initial search is now handled by the route watcher
   },
 };
 </script>
 
 <style scoped>
-.search-results-list {
-  list-style: none;
-  padding: 0;
+.search-view {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
 }
 
-.result-item {
+/* Search Header */
+.search-header {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.search-header h1 {
   margin-bottom: 1.5rem;
 }
 
-.result-link {
-  display: block;
-  padding: 1rem;
-  background-color: #f0fff0;
-  border: 2px solid #98fb98;
-  border-radius: 8px;
-  text-decoration: none;
-  color: inherit;
+.search-bar-container {
+  display: flex;
+  gap: 1rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.search-input {
+  flex: 1;
+  padding: 14px 20px;
+  font-size: 1rem;
+  border: 2px solid #8a9eaf;
+  border-radius: 12px;
   transition: all 0.3s ease;
 }
 
-.result-link:hover {
-  background-color: #e0ffe0;
-  border-color: #3cb371;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(60, 179, 113, 0.2);
+.search-input:focus {
+  border-color: #8768c8;
+  box-shadow: 0 0 0 3px rgba(135, 104, 200, 0.2);
+}
+
+.search-button {
+  padding: 14px 28px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.search-icon {
+  font-size: 1.2em;
+}
+
+.search-hint {
+  margin-top: 1rem;
+  color: #3d5d7e;
+  font-size: 0.95rem;
+}
+
+.tag-preview {
+  display: inline-block;
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  margin: 0 0.25rem;
+  font-size: 0.9em;
+}
+
+/* Results Container */
+.results-container {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.results-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #8a9eaf;
+}
+
+.results-header h2 {
+  color: #3d5d7e;
+  margin: 0;
+}
+
+/* Results Grid */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.result-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.75rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(253, 245, 232, 0.9) 100%);
+  border: 2px solid #8a9eaf;
+  border-radius: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(61, 93, 126, 0.1);
+  min-height: 200px;
+  position: relative;
+  overflow: hidden;
+}
+
+.result-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg,
+    rgba(254, 181, 3, 0.15) 0%,
+    rgba(169, 74, 102, 0.15) 30%,
+    rgba(135, 104, 200, 0.15) 60%,
+    rgba(61, 93, 126, 0.15) 100%
+  );
+  transition: left 0.5s ease;
+  z-index: 0;
+}
+
+.result-card:hover::before {
+  left: 0;
+}
+
+.result-card:hover {
+  border-color: #8768c8;
+  transform: translateY(-8px) scale(1.02);
+  box-shadow:
+    0 12px 32px rgba(135, 104, 200, 0.25),
+    0 0 0 1px rgba(254, 181, 3, 0.3);
+}
+
+.result-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.result-card-header {
+  margin-bottom: 1rem;
 }
 
 .result-title {
-  font-size: 1.25rem;
+  font-size: 1.4rem;
   font-weight: bold;
-  color: #2e8b57;
+  color: #3d5d7e;
   margin-bottom: 0.5rem;
+  line-height: 1.3;
+  transition: all 0.3s ease;
 }
 
-.result-meta {
-  margin-bottom: 0.5rem;
+.result-card:hover .result-title {
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 50%, #feb503 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transform: translateX(4px);
 }
 
 .result-author {
-  color: #666;
+  color: #8768c8;
   font-style: italic;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.result-card:hover .result-author {
+  color: #feb503;
+  transform: translateX(4px);
 }
 
 .result-description {
-  margin-bottom: 0.75rem;
-  color: #2f4f4f;
+  margin-bottom: 1rem;
+  color: #1a1a1a;
+  line-height: 1.6;
+  flex-grow: 1;
 }
 
 .result-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  margin-top: auto;
 }
 
 .tag {
-  background-color: #3cb371;
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 100%);
   color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
   font-size: 0.85rem;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(135, 104, 200, 0.2);
+  transition: all 0.3s ease;
+}
+
+.result-card:hover .tag {
+  background: linear-gradient(135deg, #feb503 0%, #a94a66 100%);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 8px rgba(254, 181, 3, 0.4);
+}
+
+/* No Results */
+.no-results {
+  text-align: center;
+  padding: 4rem 2rem;
+  animation: fadeIn 0.5s ease;
+}
+
+.no-results-icon {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+.no-results p {
+  font-size: 1.2rem;
+  color: #3d5d7e;
+  margin-bottom: 0.5rem;
+}
+
+.no-results-hint {
+  color: #8a9eaf;
+  font-size: 1rem;
 }
 </style>

@@ -37,6 +37,14 @@ npm run dev
 npm run build
 ``` -->
 
+## Visual Design Study
+
+![colors](/src/assets/colors.png)
+
+![typography](/src/assets/typography.png)
+
+Note that for my final design I decided to go with the sunset color scheme. I also decided to use a mixture of rounded and script font for my app
+
 ## Screen Recording
 
 [click here for the recording](https://youtu.be/BEZr5AArdlI)
@@ -83,3 +91,4 @@ figuring out GCS was a pain :(
 2. needed to change way files work. cannot use file paths. since backend cant just acceess the local files. changed fileurl. split the uploadfile action into two actions, requestupload and confirmupload.
 3. added a new action to FileUrl that basically gets a viewUrl every time we want to display the pdf
 4. had to rework the entire suggestTags action. it now takes in a description and tags and returns the suggested set of tags
+5. added title field to state of fileUrl since it isn't saved otherwise

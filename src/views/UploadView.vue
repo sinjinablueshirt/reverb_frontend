@@ -60,7 +60,7 @@ const onFileChange = (e) => {
 
 const submitForm = async () => {
   if (selectedFile.value) {
-    const fileId = await fileStore.uploadFile(selectedFile.value);
+    const fileId = await fileStore.uploadFile(selectedFile.value, composition.value.title);
     if (fileId) {
       composition.value.fileId = fileId;
     } else {
@@ -71,9 +71,23 @@ const submitForm = async () => {
   }
 
   composition.value.owner = authStore.user;
+
+  // Parse user-entered tags
+  let compositionTags = tags.value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+
+  // Add "public" tag if composition is public
+  if (composition.value.isPublic && !compositionTags.includes('public')) {
+    compositionTags.push('public');
+  }
+
+  // Remove "public" tag if composition is private
+  if (!composition.value.isPublic) {
+    compositionTags = compositionTags.filter(tag => tag !== 'public');
+  }
+
   const compositionData = {
     ...composition.value,
-    tags: tags.value.split(',').map(tag => tag.trim()),
+    tags: compositionTags,
   };
 
   if (isEditing.value) {
@@ -92,7 +106,10 @@ onMounted(async () => {
     await compositionStore.fetchComposition(route.params.id);
     if (compositionStore.currentComposition) {
       composition.value = { ...compositionStore.currentComposition };
-      tags.value = composition.value.tags.join(', ');
+      // Filter out "public" tag from display and set isPublic based on its presence
+      const hasPublicTag = composition.value.tags.includes('public');
+      composition.value.isPublic = hasPublicTag;
+      tags.value = composition.value.tags.filter(t => t !== 'public').join(', ');
     }
   }
 });

@@ -654,7 +654,7 @@
 
 ### POST /api/FileUrl/requestUpload
 
-**Description:** Requests presigned URLs in order to upload files to Google Cloud Storage.
+**Description:** Generates pre-signed URLs for clients to upload files directly to GCS.
 
 **Requirements:**
 - `fileName` isn't empty.
@@ -693,7 +693,7 @@
 
 ### POST /api/FileUrl/confirmUpload
 
-**Description:** Confirms a successful file upload to GCS and creates a database record.
+**Description:** Confirms a file upload to GCS and creates a permanent file record in the database.
 
 **Requirements:**
 - An object exists in GCS with `gcsObjectName`.
@@ -711,6 +711,7 @@
 ```json
 {
   "fileName": "string",
+  "title": "string",
   "gcsObjectName": "string",
   "owner": "string"
 }
@@ -734,11 +735,10 @@
 
 ### POST /api/FileUrl/deleteFile
 
-**Description:** Deletes a file from the concept's state and the external Google Cloud Storage.
+**Description:** Deletes a file record from the database and its corresponding content from GCS.
 
 **Requirements:**
-- `file` exists
-- `user` is its `owner`
+- `file` exists and `user` is its `owner`.
 
 **Effects:**
 - Removes `file` from the concept's state (MongoDB).
@@ -768,7 +768,7 @@
 
 ### POST /api/FileUrl/getViewUrl
 
-**Description:** Generates and returns a pre-signed URL that allows viewing/downloading the file from Google Cloud Storage for a limited time.
+**Description:** Generates a pre-signed URL for viewing/downloading a file from GCS.
 
 **Requirements:**
 - `gcsObjectName` exists in GCS.
@@ -801,7 +801,7 @@
 
 ### POST /api/FileUrl/_getFilesByUser
 
-**Description:** Returns an array of `File` documents (metadata) owned by the specified `user`.
+**Description:** Returns an array of file metadata owned by the specified user.
 
 **Requirements:**
 - `user` exists (conceptually, or an active user session).
@@ -821,6 +821,7 @@
 [
   {
     "_id": "string",
+    "title": "string",
     "owner": "string",
     "url": "string",
     "gcsObjectName": "string",
@@ -840,7 +841,7 @@
 
 ### POST /api/FileUrl/_getFileById
 
-**Description:** Returns the `File` document (metadata) matching the given `fileId`, or `null` if not found.
+**Description:** Returns the file metadata matching the given file ID, or null if not found.
 
 **Requirements:**
 - none
@@ -859,17 +860,49 @@
 ```json
 [
   {
-    "file": {
-      "_id": "string",
-      "owner": "string",
-      "url": "string",
-      "gcsObjectName": "string",
-      "fileName": "string"
-    }
+    "_id": "string",
+    "title": "string",
+    "owner": "string",
+    "url": "string",
+    "gcsObjectName": "string",
+    "fileName": "string"
   }
 ]
 ```
-*(Note: If the file is not found, `file` will be `null` within the array element.)*
+*(Note: If the file is not found, an empty array `[]` will be returned. If found, an array containing one object with the specified structure will be returned.)*
+
+**Error Response Body:**
+```json
+{
+  "error": "string"
+}
+```
+
+---
+
+### POST /api/FileUrl/_getFileTitleById
+
+**Description:** Retrieves the title of a file by its ID.
+
+**Requirements:**
+- none
+
+**Effects:**
+- Returns the title of the file.
+
+**Request Body:**
+```json
+{
+  "fileId": "string"
+}
+```
+
+**Success Response Body (Query):**
+```json
+{
+    "title": "string"
+}
+```
 
 **Error Response Body:**
 ```json
