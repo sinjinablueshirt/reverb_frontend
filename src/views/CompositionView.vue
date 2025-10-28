@@ -460,9 +460,11 @@ watch(() => route.params.id, loadComposition);
 
 /* Visibility Toggle */
 .visibility-toggle {
-  border-top: 2px solid #8768c8;
-  padding-top: 1.5rem;
-  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  border-left: 4px solid #8768c8;
+  margin-bottom: 1.5rem;
 }
 
 .toggle-container {
@@ -525,9 +527,10 @@ watch(() => route.params.id, loadComposition);
 
 /* Delete Section */
 .delete-section {
-  border-top: 2px solid #a94a66;
-  padding-top: 1.5rem;
-  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  border-left: 4px solid #a94a66;
 }
 
 .delete-button {

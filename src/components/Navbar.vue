@@ -106,7 +106,7 @@ const handleLogout = () => {
 }
 
 .hamburger-btn.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -7px);
+  transform: rotate(-45deg) translate(5.5px, -5.5px);
 }
 
 /* Overlay */
