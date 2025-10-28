@@ -79,6 +79,7 @@
               {{ suggestingTags ? 'Suggesting...' : 'Suggest Tags' }}
             </button>
           </div>
+          <div v-if="suggestTagsError" class="suggest-tags-error">{{ suggestTagsError }}</div>
           <button @click="submitComment" :disabled="!newCommentText.trim()">
             Submit Feedback
           </button>
@@ -142,6 +143,7 @@ const loading = ref(false);
 const newCommentText = ref('');
 const newCommentTags = ref('');
 const suggestingTags = ref(false);
+const suggestTagsError = ref('');
 const userNames = ref({});
 const compositionOwnerName = ref('');
 const isPublic = ref(false);
@@ -213,6 +215,7 @@ const suggestTags = async () => {
   if (!newCommentText.value.trim()) return;
 
   suggestingTags.value = true;
+  suggestTagsError.value = '';
 
   try {
     // Parse existing tags from the input
@@ -232,15 +235,21 @@ const suggestTags = async () => {
 
     const data = await response.json();
 
-    if (data.tags && Array.isArray(data.tags)) {
+    if (data.tags && Array.isArray(data.tags) && data.tags.length > 0) {
       // Append suggested tags to existing tags
       const allTags = [...existingTags, ...data.tags];
       newCommentTags.value = allTags.join(', ');
+      suggestTagsError.value = '';
     } else if (data.error) {
       console.error('Error suggesting tags:', data.error);
+      suggestTagsError.value = 'Unable to find tags that match the comment content.';
+    } else {
+      // No tags were returned
+      suggestTagsError.value = 'Unable to find tags that match the comment content.';
     }
   } catch (error) {
     console.error('Failed to suggest tags:', error);
+    suggestTagsError.value = 'Unable to find tags that match the comment content.';
   } finally {
     suggestingTags.value = false;
   }
@@ -665,6 +674,14 @@ watch(() => route.params.id, loadComposition);
   background-color: #ffe6f0;
   padding: 0.5rem;
   border-radius: 8px;
+}
+
+.suggest-tags-error {
+  color: #d32f2f;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
 }
 
 .login-prompt {
