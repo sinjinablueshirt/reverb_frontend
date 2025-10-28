@@ -34,6 +34,13 @@
             <span class="toggle-label">{{ isPublic ? 'Public' : 'Private' }}</span>
           </div>
         </div>
+
+        <!-- Delete Button (Owner Only) -->
+        <div v-if="isOwner" class="info-item delete-section">
+          <button @click="confirmDelete" class="delete-button">
+            🗑️ Delete Composition
+          </button>
+        </div>
       </div>
 
       <!-- PDF Viewer Section -->
@@ -116,13 +123,14 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useCompositionStore } from '@/stores/composition';
 import { useFileStore } from '@/stores/file';
 import { useCommentStore } from '@/stores/comment';
 import { useAuthStore } from '@/stores/auth';
 
 const route = useRoute();
+const router = useRouter();
 const compositionStore = useCompositionStore();
 const fileStore = useFileStore();
 const commentStore = useCommentStore();
@@ -312,6 +320,31 @@ const toggleVisibility = async () => {
   }
 };
 
+const confirmDelete = async () => {
+  if (!composition.value || !isOwner.value) return;
+
+  const confirmed = confirm(
+    `Are you sure you want to delete "${composition.value.title || 'this composition'}"?\n\n` +
+    'This will permanently delete:\n' +
+    '• The composition file\n' +
+    '• All comments and feedback\n' +
+    '• All associated data\n\n' +
+    'This action cannot be undone.'
+  );
+
+  if (!confirmed) return;
+
+  const compositionId = route.params.id;
+  const success = await compositionStore.deleteComposition(compositionId);
+
+  if (success) {
+    // Redirect to home page after successful deletion
+    router.push('/');
+  } else {
+    alert('Failed to delete composition. Please try again.');
+  }
+};
+
 onMounted(loadComposition);
 
 watch(() => route.params.id, loadComposition);
@@ -479,6 +512,38 @@ watch(() => route.params.id, loadComposition);
   font-size: 1.1rem;
   font-weight: 600;
   color: #3d5d7e;
+}
+
+/* Delete Section */
+.delete-section {
+  border-top: 2px solid #a94a66;
+  padding-top: 1.5rem;
+  margin-top: 1rem;
+}
+
+.delete-button {
+  width: 100%;
+  background: linear-gradient(135deg, #a94a66 0%, #d32f2f 100%);
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(169, 74, 102, 0.3);
+}
+
+.delete-button:hover {
+  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4);
+}
+
+.delete-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(169, 74, 102, 0.3);
 }
 
 /* PDF Section */

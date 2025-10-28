@@ -43,7 +43,7 @@ npm run build
 
 ![typography](/src/assets/typography.png)
 
-Note that for my final design I decided to go with the sunset color scheme. I also decided to use a mixture of rounded and script font for my app
+Note that for my final design I decided to go with the sunset color scheme. I also decided to use a mixture of rounded and script font for my app. I'm also a sucker for rounded themes in general, so my boxes/containers in my app all have rounded edges.
 
 ## Screen Recording
 
@@ -85,10 +85,3 @@ Bulbasaur ends up feeling not only accomplished for helping someone else out, bu
 Because Reverb serves both composers and commenters, I included two journeys to illustrate the app’s features from each perspective. I know the end result is super long, but I hope it adequately describes the journey of the users.
 
 figuring out GCS was a pain :(
-
-## Big changes (so far)
-1. added queries to concepts in order to access things. initially queries took in arguments like normal but had to change so they took in JSON-like objects (and returned json objects)
-2. needed to change way files work. cannot use file paths. since backend cant just acceess the local files. changed fileurl. split the uploadfile action into two actions, requestupload and confirmupload.
-3. added a new action to FileUrl that basically gets a viewUrl every time we want to display the pdf
-4. had to rework the entire suggestTags action. it now takes in a description and tags and returns the suggested set of tags
-5. added title field to state of fileUrl since it isn't saved otherwise

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { useAuthStore } from './auth';
 import { useFileStore } from './file';
+import { useCommentStore } from './comment';
 
 const API_URL = 'http://localhost:8000/api';
 
@@ -224,6 +225,91 @@ export const useCompositionStore = defineStore('composition', {
       } catch (error) {
         this.error = error.message;
         console.error('Error updating composition:', error);
+      }
+    },
+    async deleteComposition(id) {
+      const authStore = useAuthStore();
+      const fileStore = useFileStore();
+
+      if (!authStore.user) {
+        this.error = 'User must be logged in to delete a composition.';
+        return false;
+      }
+
+      try {
+        console.log('Starting deletion for composition ID:', id);
+        console.log('Current user:', authStore.user);
+
+        // 1. Get the registry for this resource
+        const registryResponse = await fetch(`${API_URL}/MusicTagging/_getRegistryByResource`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ resource: id }),
+        });
+        const registryData = await registryResponse.json();
+        console.log('Registry data:', registryData);
+
+        if (registryData.error) {
+          console.error('Failed to get registry:', registryData.error);
+        } else {
+          const registryId = registryData._id;
+          console.log('Registry ID:', registryId);
+
+          // 2. Delete all comments associated with this registry
+          const commentStore = useCommentStore();
+          await commentStore.fetchComments(id);
+          console.log('Comments to delete:', commentStore.comments);
+
+          for (const comment of commentStore.comments) {
+            console.log('Deleting comment:', comment._id);
+            const removeCommentResponse = await fetch(`${API_URL}/Comment/removeComment`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                comment: comment._id,
+                user: authStore.user
+              }),
+            });
+            const removeCommentResult = await removeCommentResponse.json();
+            console.log('Remove comment result:', removeCommentResult);
+          }
+
+          // 3. Delete the registry
+          console.log('Deleting registry:', registryId);
+          const deleteRegistryResponse = await fetch(`${API_URL}/MusicTagging/deleteRegistry`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ registry: registryId }),
+          });
+          const deleteRegistryResult = await deleteRegistryResponse.json();
+          console.log('Delete registry result:', deleteRegistryResult);
+        }
+
+        // 4. Delete the file from storage
+        console.log('Deleting file:', id, 'for user:', authStore.user);
+        const deleteFileResponse = await fetch(`${API_URL}/FileUrl/deleteFile`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            file: id,
+            user: authStore.user
+          }),
+        });
+        const deleteFileResult = await deleteFileResponse.json();
+        console.log('Delete file result:', deleteFileResult);
+
+        this.error = null;
+
+        // Remove from local cache
+        this.compositions = this.compositions.filter(c => c.id !== id);
+
+        console.log('Deletion completed successfully');
+        return true;
+
+      } catch (error) {
+        this.error = error.message;
+        console.error('Error deleting composition:', error);
+        return false;
       }
     }
   },
