@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { useFileStore } from './file'
-import { data } from 'autoprefixer'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
