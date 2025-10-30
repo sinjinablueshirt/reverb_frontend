@@ -1,41 +1,38 @@
 <template>
-  <div class="profile-view">
+  <div class="login-view">
     <div class="background-elements">
       <div class="floating-circle circle-1"></div>
       <div class="floating-circle circle-2"></div>
       <div class="floating-circle circle-3"></div>
     </div>
-    <div class="content">
-      <h1>User Profile</h1>
-      <div v-if="authStore.user">
-        <ChangePassword />
-        <hr />
-        <DeleteUser />
-      </div>
-      <div v-else>
-        <p>You must be logged in to view this page.</p>
-      </div>
-    </div>
+    <Login />
   </div>
 </template>
 
-<script setup>
-import { useAuthStore } from '@/stores/auth';
-import ChangePassword from '@/components/ChangePassword.vue';
-import DeleteUser from '@/components/DeleteUser.vue';
+<script>
+import Login from '@/components/Login.vue'
 
-const authStore = useAuthStore();
+export default {
+  name: 'LoginView',
+  components: {
+    Login
+  }
+}
 </script>
 
 <style scoped>
-.profile-view {
+.login-view {
   position: relative;
+  width: 100%;
   min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
 }
 
 .background-elements {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -47,7 +44,7 @@ const authStore = useAuthStore();
 .floating-circle {
   position: absolute;
   border-radius: 50%;
-  opacity: 0.15;
+  opacity: 0.4;
   animation: float 6s ease-in-out infinite;
 }
 
@@ -85,10 +82,5 @@ const authStore = useAuthStore();
   50% {
     transform: translateY(-30px) scale(1.1);
   }
-}
-
-.content {
-  position: relative;
-  z-index: 1;
 }
 </style>

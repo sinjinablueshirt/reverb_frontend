@@ -1,11 +1,29 @@
 <template>
-  <div>
-    <div v-if="authStore.user">
+  <div class="home-view">
+    <div class="background-elements">
+      <div class="floating-circle circle-1"></div>
+      <div class="floating-circle circle-2"></div>
+      <div class="floating-circle circle-3"></div>
+    </div>
+    <div v-if="authStore.user" class="content">
       <h1>Welcome, {{ authStore.username }}</h1>
-      <form @submit.prevent="search">
-        <input type="text" v-model="searchQuery" placeholder="Search for compositions by tags..." />
-        <button type="submit">Search</button>
-      </form>
+      <div class="search-section">
+        <div class="search-bar-container">
+          <input
+            type="text"
+            v-model="searchQuery"
+            @keyup.enter="search"
+            placeholder="Search by tags (comma-separated)..."
+            class="search-input"
+          />
+          <button @click="search" class="search-button">
+            <span class="search-icon">🔍</span> Search
+          </button>
+        </div>
+        <p class="search-hint" v-if="searchQuery">
+          Searching for: <span class="tag-preview" v-for="tag in searchQuery.split(',')" :key="tag">{{ tag.trim() }}</span>
+        </p>
+      </div>
       <h2>My Compositions</h2>
       <div v-if="compositionStore.compositions.length > 0" class="compositions-grid">
         <router-link
@@ -33,12 +51,21 @@
       </router-link>
     </div>
     <div v-else>
-      <h1>Welcome to Reverb</h1>
-      <p>Please log in or register to continue.</p>
-      <hr />
-      <Register />
-      <hr />
-      <Login />
+      <div class="welcome-container">
+        <div class="welcome-card">
+          <div class="welcome-icon">🎵</div>
+          <h1>Welcome to Reverb</h1>
+          <p class="welcome-text">Upload your music compositions and get valuable feedback from the community</p>
+          <div class="auth-buttons">
+            <router-link to="/login" class="auth-button login-button">
+              Login
+            </router-link>
+            <router-link to="/register" class="auth-button register-button">
+              Register
+            </router-link>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -47,8 +74,6 @@
 import { ref, onMounted, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useCompositionStore } from '@/stores/composition';
-import Login from '@/components/Login.vue';
-import Register from '@/components/Register.vue';
 import { RouterLink, useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
@@ -86,12 +111,154 @@ const search = () => {
 </script>
 
 <style scoped>
+.home-view {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.background-elements {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.floating-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.15;
+  animation: float 6s ease-in-out infinite;
+}
+
+.circle-1 {
+  width: 180px;
+  height: 180px;
+  background: linear-gradient(135deg, #8768c8, #a94a66);
+  top: 15%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.circle-2 {
+  width: 220px;
+  height: 220px;
+  background: linear-gradient(135deg, #feb503, #a94a66);
+  bottom: 10%;
+  right: 10%;
+  animation-delay: 2s;
+}
+
+.circle-3 {
+  width: 140px;
+  height: 140px;
+  background: linear-gradient(135deg, #3d5d7e, #8768c8);
+  top: 45%;
+  right: 12%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-30px) scale(1.1);
+  }
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.search-section {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.search-bar-container {
+  display: flex;
+  gap: 1rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.search-input {
+  flex: 1;
+  padding: 14px 20px;
+  font-size: 1rem;
+  border: 2px solid #8a9eaf;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #8768c8;
+  box-shadow: 0 0 0 3px rgba(135, 104, 200, 0.2);
+}
+
+.search-button {
+  padding: 14px 28px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(135, 104, 200, 0.3);
+}
+
+.search-button:hover {
+  background: linear-gradient(135deg, #a94a66 0%, #feb503 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(169, 74, 102, 0.4);
+}
+
+.search-button:active {
+  transform: translateY(0);
+}
+
+.search-icon {
+  font-size: 1.2em;
+}
+
+.search-hint {
+  margin-top: 1rem;
+  color: #3d5d7e;
+  font-size: 0.95rem;
+}
+
+.tag-preview {
+  display: inline-block;
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  margin: 0 0.25rem;
+  font-size: 0.9em;
+}
+
 .compositions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
   margin-top: 20px;
   margin-bottom: 30px;
+  text-align: left;
 }
 
 .composition-card {
@@ -201,5 +368,106 @@ const search = () => {
   background: rgba(255, 255, 255, 0.25);
   color: white;
   box-shadow: 0 2px 6px rgba(255, 255, 255, 0.3);
+}
+
+.welcome-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+  padding: 2rem;
+}
+
+.welcome-card {
+  text-align: center;
+  max-width: 500px;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(253, 245, 232, 0.95) 100%);
+  border: 2px solid #8768c8;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(135, 104, 200, 0.15);
+  animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcome-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.welcome-card h1 {
+  margin: 0 0 1rem 0;
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 50%, #feb503 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcome-text {
+  color: #3d5d7e;
+  font-size: 1.1rem;
+  margin-bottom: 2.5rem;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.auth-button {
+  padding: 14px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.login-button {
+  background: linear-gradient(135deg, #8768c8 0%, #a94a66 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(135, 104, 200, 0.3);
+}
+
+.login-button:hover {
+  background: linear-gradient(135deg, #a94a66 0%, #8768c8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(135, 104, 200, 0.4);
+}
+
+.register-button {
+  background: linear-gradient(135deg, #feb503 0%, #a94a66 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(254, 181, 3, 0.3);
+}
+
+.register-button:hover {
+  background: linear-gradient(135deg, #a94a66 0%, #feb503 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(254, 181, 3, 0.4);
 }
 </style>
