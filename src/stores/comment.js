@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { useAuthStore } from './auth';
 
-const API_URL = 'http://localhost:8000/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+// const API_URL = 'http://localhost:8000/api';
 
 export const useCommentStore = defineStore('comment', {
   state: () => ({
@@ -12,7 +13,7 @@ export const useCommentStore = defineStore('comment', {
     async registerResource(resourceId) {
       this.error = null;
       try {
-        const response = await fetch(`${API_URL}/Comment/register`, {
+        const response = await fetch(`${API_BASE}/Comment/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ resource: resourceId }),
@@ -36,7 +37,7 @@ export const useCommentStore = defineStore('comment', {
 
     async fetchComments(resourceId) {
       try {
-        const response = await fetch(`${API_URL}/Comment/_getCommentsByResource`, {
+        const response = await fetch(`${API_BASE}/Comment/_getCommentsByResource`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ resource: resourceId }),
@@ -82,7 +83,7 @@ export const useCommentStore = defineStore('comment', {
         return;
       }
       try {
-        const response = await fetch(`${API_URL}/Comment/addComment`, {
+        const response = await fetch(`${API_BASE}/Comment/addComment`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -104,7 +105,7 @@ export const useCommentStore = defineStore('comment', {
         if (tags.length > 0) {
           try {
             // Register comment as a resource in MusicTagging
-            const registerResponse = await fetch(`${API_URL}/MusicTagging/registerResource`, {
+            const registerResponse = await fetch(`${API_BASE}/MusicTagging/registerResource`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ resource: commentId, description: text }),
@@ -117,7 +118,7 @@ export const useCommentStore = defineStore('comment', {
               // Add each tag to the registry
               for (const tag of tags) {
                 if (tag.trim()) {
-                  await fetch(`${API_URL}/MusicTagging/addTag`, {
+                  await fetch(`${API_BASE}/MusicTagging/addTag`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ registry: registryId, tag: tag.trim() }),
@@ -142,7 +143,7 @@ export const useCommentStore = defineStore('comment', {
 
     async getCommentTags(commentId) {
       try {
-        const response = await fetch(`${API_URL}/MusicTagging/_getRegistryByResource`, {
+        const response = await fetch(`${API_BASE}/MusicTagging/_getRegistryByResource`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ resource: commentId }),
@@ -166,7 +167,7 @@ export const useCommentStore = defineStore('comment', {
         return;
       }
       try {
-        const response = await fetch(`${API_URL}/Comment/removeComment`, {
+        const response = await fetch(`${API_BASE}/Comment/removeComment`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

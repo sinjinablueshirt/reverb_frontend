@@ -153,6 +153,7 @@ const userNames = ref({});
 const compositionOwnerName = ref('');
 const isPublic = ref(false);
 const isOwner = ref(false);
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 const loadComposition = async () => {
   const compositionId = route.params.id;
@@ -229,7 +230,7 @@ const suggestTags = async () => {
       .map(tag => tag.trim())
       .filter(tag => tag.length > 0);
 
-    const response = await fetch('http://localhost:8000/api/MusicTagging/suggestTags', {
+    const response = await fetch(`${API_BASE}/MusicTagging/suggestTags`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -269,7 +270,7 @@ const loadUserName = async (userId) => {
   if (userNames.value[userId]) return;
 
   try {
-    const response = await fetch('http://localhost:8000/api/UserAuthentication/_getUserById', {
+    const response = await fetch(`${API_BASE}/UserAuthentication/_getUserById`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: userId }),

@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { useAuthStore } from './auth';
 
-const API_URL = 'http://localhost:8000/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+// const API_URL = 'http://localhost:8000/api';
 
 export const useFileStore = defineStore('file', {
   state: () => ({
@@ -20,7 +21,7 @@ export const useFileStore = defineStore('file', {
 
       try {
         // 1. Request upload URL
-        const requestUploadResponse = await fetch(`${API_URL}/FileUrl/requestUpload`, {
+        const requestUploadResponse = await fetch(`${API_BASE}/FileUrl/requestUpload`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ fileName: file.name, owner: authStore.user }),
@@ -50,7 +51,7 @@ export const useFileStore = defineStore('file', {
         }
 
         // 3. Confirm upload
-        const confirmUploadResponse = await fetch(`${API_URL}/FileUrl/confirmUpload`, {
+        const confirmUploadResponse = await fetch(`${API_BASE}/FileUrl/confirmUpload`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -78,7 +79,7 @@ export const useFileStore = defineStore('file', {
       this.error = null;
       console.log('Fetching files for user:', userId);
       try {
-        const response = await fetch(`${API_URL}/FileUrl/_getFilesByUser`, {
+        const response = await fetch(`${API_BASE}/FileUrl/_getFilesByUser`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user: userId }),
@@ -105,7 +106,7 @@ export const useFileStore = defineStore('file', {
         this.error = null;
         console.log('Fetching file by ID:', fileId);
         try {
-            const response = await fetch(`${API_URL}/FileUrl/_getFileById`, {
+            const response = await fetch(`${API_BASE}/FileUrl/_getFileById`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ fileId }),
@@ -128,7 +129,7 @@ export const useFileStore = defineStore('file', {
     async getViewUrl(gcsObjectName) {
         this.error = null;
         try {
-            const response = await fetch(`${API_URL}/FileUrl/getViewUrl`, {
+            const response = await fetch(`${API_BASE}/FileUrl/getViewUrl`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ gcsObjectName }),

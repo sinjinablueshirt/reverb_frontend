@@ -3,7 +3,8 @@ import { useAuthStore } from './auth';
 import { useFileStore } from './file';
 import { useCommentStore } from './comment';
 
-const API_URL = 'http://localhost:8000/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+// const API_URL = 'http://localhost:8000/api';
 
 export const useCompositionStore = defineStore('composition', {
   state: () => ({
@@ -15,7 +16,7 @@ export const useCompositionStore = defineStore('composition', {
   actions: {
     async searchCompositions(tags) {
       try {
-        const response = await fetch('/api/MusicTagging/_getRegistriesByTags', {
+        const response = await fetch(`${API_BASE}/MusicTagging/_getRegistriesByTags`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -51,7 +52,7 @@ export const useCompositionStore = defineStore('composition', {
         }
 
         // 1. Register resource with MusicTagging
-        const registerResponse = await fetch(`${API_URL}/MusicTagging/registerResource`, {
+        const registerResponse = await fetch(`${API_BASE}/MusicTagging/registerResource`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ resource: fileId, description: compositionData.description }),
@@ -66,7 +67,7 @@ export const useCompositionStore = defineStore('composition', {
         // 2. Add tags
         for (const tag of compositionData.tags) {
           if (tag) { // Ensure tag is not an empty string
-            await fetch(`${API_URL}/MusicTagging/addTag`, {
+            await fetch(`${API_BASE}/MusicTagging/addTag`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ registry: registryId, tag }),
@@ -93,7 +94,7 @@ export const useCompositionStore = defineStore('composition', {
         for (const file of files.files) {
 
           try {
-            const registry = await fetch(`${API_URL}/MusicTagging/_getRegistryByResource`, {
+            const registry = await fetch(`${API_BASE}/MusicTagging/_getRegistryByResource`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ resource: file._id }),
@@ -137,7 +138,7 @@ export const useCompositionStore = defineStore('composition', {
           const file = await fileStore.getFileById(id);
           if (file) {
             // Fetch the registry details
-            const registry = await fetch(`${API_URL}/MusicTagging/_getRegistryByResource`, {
+            const registry = await fetch(`${API_BASE}/MusicTagging/_getRegistryByResource`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ resource: id }),
@@ -176,7 +177,7 @@ export const useCompositionStore = defineStore('composition', {
         const fileId = id;
 
         // Get the registry for this resource
-        const registryResponse = await fetch(`${API_URL}/MusicTagging/_getRegistryByResource`, {
+        const registryResponse = await fetch(`${API_BASE}/MusicTagging/_getRegistryByResource`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ resource: fileId }),
@@ -197,7 +198,7 @@ export const useCompositionStore = defineStore('composition', {
           // Remove tags that are no longer present
           for (const tag of currentTags) {
             if (!data.tags.includes(tag)) {
-              await fetch(`${API_URL}/MusicTagging/removeTag`, {
+              await fetch(`${API_BASE}/MusicTagging/removeTag`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ registry: registryId, tag }),
@@ -208,7 +209,7 @@ export const useCompositionStore = defineStore('composition', {
           // Add new tags
           for (const tag of data.tags) {
             if (tag && !currentTags.includes(tag)) {
-              await fetch(`${API_URL}/MusicTagging/addTag`, {
+              await fetch(`${API_BASE}/MusicTagging/addTag`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ registry: registryId, tag }),
@@ -241,7 +242,7 @@ export const useCompositionStore = defineStore('composition', {
         console.log('Current user:', authStore.user);
 
         // 1. Get the registry for this resource
-        const registryResponse = await fetch(`${API_URL}/MusicTagging/_getRegistryByResource`, {
+        const registryResponse = await fetch(`${API_BASE}/MusicTagging/_getRegistryByResource`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ resource: id }),
@@ -262,7 +263,7 @@ export const useCompositionStore = defineStore('composition', {
 
           for (const comment of commentStore.comments) {
             console.log('Deleting comment:', comment._id);
-            const removeCommentResponse = await fetch(`${API_URL}/Comment/removeComment`, {
+            const removeCommentResponse = await fetch(`${API_BASE}/Comment/removeComment`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -276,7 +277,7 @@ export const useCompositionStore = defineStore('composition', {
 
           // 3. Delete the registry
           console.log('Deleting registry:', registryId);
-          const deleteRegistryResponse = await fetch(`${API_URL}/MusicTagging/deleteRegistry`, {
+          const deleteRegistryResponse = await fetch(`${API_BASE}/MusicTagging/deleteRegistry`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ registry: registryId }),
@@ -287,7 +288,7 @@ export const useCompositionStore = defineStore('composition', {
 
         // 4. Delete the file from storage
         console.log('Deleting file:', id, 'for user:', authStore.user);
-        const deleteFileResponse = await fetch(`${API_URL}/FileUrl/deleteFile`, {
+        const deleteFileResponse = await fetch(`${API_BASE}/FileUrl/deleteFile`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

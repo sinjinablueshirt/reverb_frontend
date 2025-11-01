@@ -61,6 +61,8 @@ import { useFileStore } from '@/stores/file';
 import { mapActions, mapState } from 'pinia';
 import { RouterLink } from 'vue-router';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+
 export default {
   components: {
     RouterLink,
@@ -141,7 +143,7 @@ export default {
       }
 
       try {
-        const response = await fetch('http://localhost:8000/api/UserAuthentication/_getUserById', {
+        const response = await fetch(`${API_BASE}/UserAuthentication/_getUserById`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: userId }),

@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { useFileStore } from './file'
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
@@ -10,7 +12,7 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async register(username, password) {
       try {
-        const response = await fetch('/api/UserAuthentication/register', {
+        const response = await fetch(`${API_BASE}/UserAuthentication/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -36,7 +38,7 @@ export const useAuthStore = defineStore('auth', {
     async login(username, password) {
       try {
         console.log("Attempting to log in user:", username);
-        const response = await fetch('/api/UserAuthentication/login', {
+        const response = await fetch(`${API_BASE}/UserAuthentication/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -61,7 +63,7 @@ export const useAuthStore = defineStore('auth', {
     },
     async deleteUser(username, password) {
         try {
-            const response = await fetch('/api/UserAuthentication/deleteUser', {
+            const response = await fetch(`${API_BASE}/UserAuthentication/deleteUser`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -82,7 +84,7 @@ export const useAuthStore = defineStore('auth', {
     },
     async changePassword(username, oldPassword, newPassword) {
         try {
-            const response = await fetch('/api/UserAuthentication/changePassword', {
+            const response = await fetch(`${API_BASE}/UserAuthentication/changePassword`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -106,7 +108,7 @@ export const useAuthStore = defineStore('auth', {
     async getUserById(userId) {
         this.error = null;
         try {
-            const response = await fetch(`${API_URL}/UserAuthentication/_getUserById`, {
+            const response = await fetch(`${API_BASE}/UserAuthentication/_getUserById`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId }),
