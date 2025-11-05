@@ -59,6 +59,15 @@
         </div>
       </div>
 
+      <!-- Delete Loading Overlay -->
+      <div v-if="isDeleting" class="delete-overlay">
+        <div class="delete-modal">
+          <div class="delete-spinner"></div>
+          <p class="delete-text">Deleting composition...</p>
+          <p class="delete-subtext">Please wait while we remove all data.</p>
+        </div>
+      </div>
+
       <!-- Comments Section -->
       <div class="comments-section">
         <h2>Feedback</h2>
@@ -153,6 +162,7 @@ const userNames = ref({});
 const compositionOwnerName = ref('');
 const isPublic = ref(false);
 const isOwner = ref(false);
+const isDeleting = ref(false);
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 const loadComposition = async () => {
@@ -348,6 +358,8 @@ const confirmDelete = async () => {
 
   if (!confirmed) return;
 
+  isDeleting.value = true;
+
   const compositionId = route.params.id;
   const success = await compositionStore.deleteComposition(compositionId);
 
@@ -356,6 +368,7 @@ const confirmDelete = async () => {
     router.push('/');
   } else {
     alert('Failed to delete composition. Please try again.');
+    isDeleting.value = false;
   }
 };
 
@@ -829,6 +842,111 @@ watch(() => route.params.id, loadComposition);
 
 .delete-btn:hover {
   background-color: #ff5252;
+}
+
+/* Delete Loading Overlay */
+.delete-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.delete-modal {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(253, 245, 232, 0.95));
+  padding: 3rem 4rem;
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(169, 74, 102, 0.4);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+  animation: slideUp 0.4s ease;
+}
+
+.delete-modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 24px;
+  padding: 2px;
+  background: linear-gradient(135deg, #a94a66, #d32f2f, #a94a66);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  animation: borderGlow 2s ease-in-out infinite;
+}
+
+@keyframes borderGlow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.delete-spinner {
+  width: 80px;
+  height: 80px;
+  border: 6px solid rgba(169, 74, 102, 0.2);
+  border-top: 6px solid #a94a66;
+  border-right: 6px solid #d32f2f;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.delete-text {
+  font-size: 1.3rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #a94a66 0%, #d32f2f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.5rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.delete-subtext {
+  color: #3d5d7e;
+  font-size: 0.95rem;
+  margin: 0;
+  opacity: 0.8;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 /* Responsive design for smaller screens */
