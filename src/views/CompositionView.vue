@@ -169,7 +169,6 @@ const loadComposition = async () => {
 
   // Register the composition as a commentable resource and load comments
   if (composition.value) {
-    await commentStore.registerResource(compositionId);
     await commentStore.fetchComments(compositionId);
 
     // Check if current user is the owner

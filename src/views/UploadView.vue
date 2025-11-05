@@ -30,7 +30,8 @@
       </div>
       <button type="submit">{{ isEditing ? 'Update' : 'Post' }}</button>
     </form>
-    <div v-if="compositionStore.error">{{ compositionStore.error }}</div>
+    <div v-if="fileStore.error" class="error">{{ fileStore.error }}</div>
+    <div v-if="compositionStore.error" class="error">{{ compositionStore.error }}</div>
   </div>
   </div>
 </template>

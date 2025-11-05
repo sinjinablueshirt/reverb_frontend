@@ -70,10 +70,18 @@ export const useCompositionStore = defineStore('composition', {
             await fetch(`${API_BASE}/MusicTagging/addTag`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ registry: registryId, tag }),
+              body: JSON.stringify({
+                registry: registryId,
+                tag,
+                session: authStore.session,
+              }),
             });
           }
         }
+
+        // 3. Register the composition as a commentable resource
+        const commentStore = useCommentStore();
+        await commentStore.registerResource(fileId);
 
         this.error = null;
 
@@ -201,7 +209,11 @@ export const useCompositionStore = defineStore('composition', {
               await fetch(`${API_BASE}/MusicTagging/removeTag`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ registry: registryId, tag }),
+                body: JSON.stringify({
+                  registry: registryId,
+                  tag,
+                  session: authStore.session,
+                }),
               });
             }
           }
@@ -212,7 +224,11 @@ export const useCompositionStore = defineStore('composition', {
               await fetch(`${API_BASE}/MusicTagging/addTag`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ registry: registryId, tag }),
+                body: JSON.stringify({
+                  registry: registryId,
+                  tag,
+                  session: authStore.session,
+                }),
               });
             }
           }
@@ -268,7 +284,8 @@ export const useCompositionStore = defineStore('composition', {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 comment: comment._id,
-                user: authStore.user
+                user: authStore.user,
+                session: authStore.session,
               }),
             });
             const removeCommentResult = await removeCommentResponse.json();
@@ -280,7 +297,10 @@ export const useCompositionStore = defineStore('composition', {
           const deleteRegistryResponse = await fetch(`${API_BASE}/MusicTagging/deleteRegistry`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ registry: registryId }),
+            body: JSON.stringify({
+              registry: registryId,
+              session: authStore.session,
+            }),
           });
           const deleteRegistryResult = await deleteRegistryResponse.json();
           console.log('Delete registry result:', deleteRegistryResult);
@@ -293,7 +313,8 @@ export const useCompositionStore = defineStore('composition', {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             file: id,
-            user: authStore.user
+            user: authStore.user,
+            session: authStore.session,
           }),
         });
         const deleteFileResult = await deleteFileResponse.json();

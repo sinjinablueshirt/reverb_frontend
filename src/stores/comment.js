@@ -121,7 +121,11 @@ export const useCommentStore = defineStore('comment', {
                   await fetch(`${API_BASE}/MusicTagging/addTag`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ registry: registryId, tag: tag.trim() }),
+                    body: JSON.stringify({
+                      registry: registryId,
+                      tag: tag.trim(),
+                      session: authStore.session,
+                    }),
                   });
                 }
               }
@@ -173,6 +177,7 @@ export const useCommentStore = defineStore('comment', {
           body: JSON.stringify({
             comment: commentId,
             user: authStore.user,
+            session: authStore.session,
           }),
         });
         const data = await response.json();

@@ -24,7 +24,11 @@ export const useFileStore = defineStore('file', {
         const requestUploadResponse = await fetch(`${API_BASE}/FileUrl/requestUpload`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fileName: file.name, owner: authStore.user }),
+          body: JSON.stringify({
+            fileName: file.name,
+            owner: authStore.user,
+            session: authStore.session,
+          }),
         });
 
         const data = await requestUploadResponse.json(); // ✅ call once
@@ -59,6 +63,7 @@ export const useFileStore = defineStore('file', {
             title: title,
             gcsObjectName,
             owner: authStore.user,
+            session: authStore.session,
           }),
         });
 
@@ -127,12 +132,16 @@ export const useFileStore = defineStore('file', {
     },
 
     async getViewUrl(gcsObjectName) {
+        const authStore = useAuthStore();
         this.error = null;
         try {
             const response = await fetch(`${API_BASE}/FileUrl/getViewUrl`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ gcsObjectName }),
+                body: JSON.stringify({
+                  gcsObjectName,
+                  session: authStore.session,
+                }),
             });
 
             if (!response.ok) {
