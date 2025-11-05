@@ -24,7 +24,12 @@
       </p>
     </div>
 
-    <div v-if="searchResults.length" class="results-container">
+    <div v-if="isLoading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Searching for compositions...</p>
+    </div>
+
+    <div v-else-if="searchResults.length" class="results-container">
       <div class="results-header">
         <h2>Found {{ enrichedResults.length }} composition{{ enrichedResults.length !== 1 ? 's' : '' }}</h2>
       </div>
@@ -72,6 +77,7 @@ export default {
       enrichedResults: [],
       userNames: {},
       searchQuery: '',
+      isLoading: false,
     };
   },
   computed: {
@@ -97,6 +103,7 @@ export default {
     async enrichSearchResults() {
       const fileStore = useFileStore();
       const enriched = [];
+      this.isLoading = true;
 
       for (const result of this.searchResults) {
         console.log('Enriching search result:', result);
@@ -135,6 +142,7 @@ export default {
       }
 
       this.enrichedResults = enriched;
+      this.isLoading = false;
     },
 
     async getUserName(userId) {
@@ -476,6 +484,44 @@ export default {
   text-align: center;
   padding: 4rem 2rem;
   animation: fadeIn 0.5s ease;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  min-height: 300px;
+  animation: fadeIn 0.3s ease;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(135, 104, 200, 0.2);
+  border-top: 5px solid #8768c8;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #3d5d7e;
+  font-size: 1.1rem;
+  font-weight: 500;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .no-results-icon {

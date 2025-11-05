@@ -29,14 +29,24 @@
             required
           />
         </div>
+        <div class="input-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            v-model="confirmPassword"
+            placeholder="Re-enter your password"
+            required
+          />
+        </div>
         <button type="submit" class="register-button">
           <span class="button-text">Create Account</span>
           <span class="button-icon">→</span>
         </button>
       </form>
-      <div v-if="error" class="error-message">
+      <div v-if="localError || error" class="error-message">
         <span class="error-icon">⚠️</span>
-        {{ error }}
+        {{ localError || error }}
       </div>
       <div class="login-link">
         <p>Already have an account? <router-link to="/login">Login here</router-link></p>
@@ -53,7 +63,9 @@ export default {
   data() {
     return {
       username: '',
-      password: ''
+      password: '',
+      confirmPassword: '',
+      localError: ''
     }
   },
   computed: {
@@ -62,6 +74,21 @@ export default {
   methods: {
     ...mapActions(useAuthStore, ['register']),
     async handleRegister() {
+      // Clear previous local error
+      this.localError = ''
+
+      // Check if passwords match
+      if (this.password !== this.confirmPassword) {
+        this.localError = 'Passwords do not match'
+        return
+      }
+
+      // Check password length
+      if (this.password.length < 6) {
+        this.localError = 'Password must be at least 6 characters long'
+        return
+      }
+
       await this.register(this.username, this.password)
       const authStore = useAuthStore()
       if (authStore.user && !authStore.error) {
@@ -219,6 +246,10 @@ export default {
   animation-delay: 0.5s;
 }
 
+.input-group:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
 .input-group label {
   color: #3d5d7e;
   font-weight: 600;
@@ -267,7 +298,7 @@ export default {
   gap: 0.5rem;
   position: relative;
   overflow: hidden;
-  animation: fadeIn 0.6s ease 0.6s both;
+  animation: fadeIn 0.6s ease 0.7s both;
 }
 
 .register-button::before {
@@ -335,7 +366,7 @@ export default {
   text-align: center;
   padding-top: 1.5rem;
   border-top: 1px solid rgba(138, 158, 175, 0.3);
-  animation: fadeIn 0.6s ease 0.7s both;
+  animation: fadeIn 0.6s ease 0.8s both;
 }
 
 .login-link p {
