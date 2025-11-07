@@ -27,12 +27,8 @@ export const useAuthStore = defineStore('auth', {
           this.username = null
           this.session = null
         } else {
-          this.user = data.user
-          this.username = username;
-          this.error = null
-
-          // Create session after successful registration
-          await this.createSession(data.user)
+          // Registration successful, now log in to get a session
+          await this.login(username, password)
         }
       } catch (error) {
         this.error = error.message
@@ -55,15 +51,13 @@ export const useAuthStore = defineStore('auth', {
         if (data.error) {
           this.error = data.error
           this.user = null
-        this.username = null
-        this.session = null
+          this.username = null
+          this.session = null
         } else {
           this.user = data.user
           this.username = username;
+          this.session = data.session;
           this.error = null
-
-          // Create session after successful login
-          await this.createSession(data.user)
         }
       } catch (error) {
         this.error = error.message
@@ -79,7 +73,7 @@ export const useAuthStore = defineStore('auth', {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ session: this.session, username, password })
             })
             const data = await response.json()
             if (data.error) {
@@ -87,6 +81,7 @@ export const useAuthStore = defineStore('auth', {
             } else {
                 this.user = null
                 this.username = null
+                this.session = null
                 this.error = null
             }
         } catch (error) {
@@ -100,7 +95,7 @@ export const useAuthStore = defineStore('auth', {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, oldPassword, newPassword })
+                body: JSON.stringify({ session: this.session, username, oldPassword, newPassword })
             })
             const data = await response.json()
             if (data.error) {
@@ -112,10 +107,17 @@ export const useAuthStore = defineStore('auth', {
             this.error = error.message
         }
     },
-    logout() {
-      // Delete session before clearing user state
-      if (this.session) {
-        this.deleteSession()
+    async logout() {
+      try {
+        if (this.session) {
+          await fetch(`${API_BASE}/UserAuthentication/logout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session: this.session }),
+          });
+        }
+      } catch (error) {
+        console.error('Error logging out:', error);
       }
       this.user = null
       this.username = null
@@ -144,38 +146,6 @@ export const useAuthStore = defineStore('auth', {
             this.error = error.message;
             return null;
         }
-    },
-    async createSession(userId) {
-      try {
-        const response = await fetch(`${API_BASE}/Sessioning/create`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user: userId }),
-        });
-        const data = await response.json();
-        if (data.error) {
-          console.error('Failed to create session:', data.error);
-          this.session = null;
-        } else {
-          this.session = data.session;
-        }
-      } catch (error) {
-        console.error('Error creating session:', error);
-        this.session = null;
-      }
-    },
-    async deleteSession() {
-      try {
-        if (this.session) {
-          await fetch(`${API_BASE}/Sessioning/delete`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ session: this.session }),
-          });
-        }
-      } catch (error) {
-        console.error('Error deleting session:', error);
-      }
     },
     }
 })

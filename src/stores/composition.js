@@ -55,7 +55,7 @@ export const useCompositionStore = defineStore('composition', {
         const registerResponse = await fetch(`${API_BASE}/MusicTagging/registerResource`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ resource: fileId, description: compositionData.description }),
+          body: JSON.stringify({ session: authStore.session, resource: fileId, description: compositionData.description }),
         });
         const registerData = await registerResponse.json();
         if (registerData.error) {
@@ -71,9 +71,9 @@ export const useCompositionStore = defineStore('composition', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
+                session: authStore.session,
                 registry: registryId,
                 tag,
-                session: authStore.session,
               }),
             });
           }
@@ -210,9 +210,9 @@ export const useCompositionStore = defineStore('composition', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                  session: authStore.session,
                   registry: registryId,
                   tag,
-                  session: authStore.session,
                 }),
               });
             }
@@ -225,9 +225,9 @@ export const useCompositionStore = defineStore('composition', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                  session: authStore.session,
                   registry: registryId,
                   tag,
-                  session: authStore.session,
                 }),
               });
             }
@@ -283,9 +283,9 @@ export const useCompositionStore = defineStore('composition', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
+                session: authStore.session,
                 comment: comment._id,
                 user: authStore.user,
-                session: authStore.session,
               }),
             });
             const removeCommentResult = await removeCommentResponse.json();
@@ -298,8 +298,8 @@ export const useCompositionStore = defineStore('composition', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              registry: registryId,
               session: authStore.session,
+              registry: registryId,
             }),
           });
           const deleteRegistryResult = await deleteRegistryResponse.json();
@@ -312,9 +312,9 @@ export const useCompositionStore = defineStore('composition', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            session: authStore.session,
             file: id,
             user: authStore.user,
-            session: authStore.session,
           }),
         });
         const deleteFileResult = await deleteFileResponse.json();

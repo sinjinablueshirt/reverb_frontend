@@ -4,9 +4,11 @@
       <div class="floating-circle circle-1"></div>
       <div class="floating-circle circle-2"></div>
       <div class="floating-circle circle-3"></div>
+      <div class="floating-circle circle-4"></div>
+      <div class="floating-circle circle-5"></div>
     </div>
     <div class="content">
-      <h1>{{ isEditing ? 'Edit' : 'Upload' }} Composition</h1>
+      <h1 class="animated-element">{{ isEditing ? 'Edit' : 'Upload' }} Composition</h1>
 
       <!-- Loading Overlay -->
       <div v-if="isUploading" class="upload-overlay">
@@ -17,7 +19,7 @@
         </div>
       </div>
 
-      <form @submit.prevent="submitForm">
+      <form @submit.prevent="submitForm" class="animated-element" style="animation-delay: 0.1s">
       <div>
         <label for="title">Title</label>
         <input type="text" id="title" v-model="composition.title" required />
@@ -40,8 +42,8 @@
       </div>
       <button type="submit">{{ isEditing ? 'Update' : 'Post' }}</button>
     </form>
-    <div v-if="fileStore.error" class="error">{{ fileStore.error }}</div>
-    <div v-if="compositionStore.error" class="error">{{ compositionStore.error }}</div>
+    <div v-if="fileStore.error" class="error animated-element" style="animation-delay: 0.2s">{{ fileStore.error }}</div>
+    <div v-if="compositionStore.error" class="error animated-element" style="animation-delay: 0.2s">{{ compositionStore.error }}</div>
   </div>
   </div>
 </template>
@@ -149,6 +151,22 @@ onMounted(async () => {
   overflow: hidden;
 }
 
+.animated-element {
+  animation: fadeInUp 0.6s ease-out both;
+  opacity: 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .background-elements {
   position: fixed;
   top: 0;
@@ -162,43 +180,62 @@ onMounted(async () => {
 .floating-circle {
   position: absolute;
   border-radius: 50%;
-  opacity: 0.15;
+  opacity: 0.18;
   animation: float 6s ease-in-out infinite;
+  filter: blur(1px);
 }
 
 .circle-1 {
-  width: 180px;
-  height: 180px;
+  width: 200px;
+  height: 200px;
   background: linear-gradient(135deg, #8768c8, #a94a66);
   top: 15%;
-  left: 10%;
+  left: 8%;
   animation-delay: 0s;
 }
 
 .circle-2 {
-  width: 220px;
-  height: 220px;
+  width: 240px;
+  height: 240px;
   background: linear-gradient(135deg, #feb503, #a94a66);
-  bottom: 10%;
+  bottom: 8%;
   right: 10%;
   animation-delay: 2s;
 }
 
 .circle-3 {
-  width: 140px;
-  height: 140px;
+  width: 160px;
+  height: 160px;
   background: linear-gradient(135deg, #3d5d7e, #8768c8);
   top: 45%;
   right: 12%;
   animation-delay: 4s;
 }
 
+.circle-4 {
+  width: 180px;
+  height: 180px;
+  background: linear-gradient(135deg, #feb503, #8768c8);
+  top: 65%;
+  left: 5%;
+  animation-delay: 1s;
+}
+
+.circle-5 {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, #a94a66, #3d5d7e);
+  top: 25%;
+  right: 25%;
+  animation-delay: 3s;
+}
+
 @keyframes float {
   0%, 100% {
-    transform: translateY(0) scale(1);
+    transform: translateY(0) scale(1) rotate(0deg);
   }
   50% {
-    transform: translateY(-30px) scale(1.1);
+    transform: translateY(-30px) scale(1.1) rotate(5deg);
   }
 }
 

@@ -25,9 +25,9 @@ export const useFileStore = defineStore('file', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            session: authStore.session,
             fileName: file.name,
             owner: authStore.user,
-            session: authStore.session,
           }),
         });
 
@@ -59,11 +59,11 @@ export const useFileStore = defineStore('file', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            session: authStore.session,
             fileName: file.name,
             title: title,
             gcsObjectName,
             owner: authStore.user,
-            session: authStore.session,
           }),
         });
 
@@ -139,8 +139,8 @@ export const useFileStore = defineStore('file', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  gcsObjectName,
                   session: authStore.session,
+                  gcsObjectName,
                 }),
             });
 

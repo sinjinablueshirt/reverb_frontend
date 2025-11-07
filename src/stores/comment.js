@@ -11,12 +11,13 @@ export const useCommentStore = defineStore('comment', {
   }),
   actions: {
     async registerResource(resourceId) {
+      const authStore = useAuthStore();
       this.error = null;
       try {
         const response = await fetch(`${API_BASE}/Comment/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ resource: resourceId }),
+          body: JSON.stringify({ session: authStore.session, resource: resourceId }),
         });
 
         if (!response.ok) {
@@ -87,6 +88,7 @@ export const useCommentStore = defineStore('comment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            session: authStore.session,
             resource: resourceId,
             commenter: authStore.user,
             text: text,
@@ -108,7 +110,7 @@ export const useCommentStore = defineStore('comment', {
             const registerResponse = await fetch(`${API_BASE}/MusicTagging/registerResource`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ resource: commentId, description: text }),
+              body: JSON.stringify({ session: authStore.session, resource: commentId, description: text }),
             });
             const registerData = await registerResponse.json();
 
@@ -122,9 +124,9 @@ export const useCommentStore = defineStore('comment', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                      session: authStore.session,
                       registry: registryId,
                       tag: tag.trim(),
-                      session: authStore.session,
                     }),
                   });
                 }
@@ -175,9 +177,9 @@ export const useCommentStore = defineStore('comment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            session: authStore.session,
             comment: commentId,
             user: authStore.user,
-            session: authStore.session,
           }),
         });
         const data = await response.json();

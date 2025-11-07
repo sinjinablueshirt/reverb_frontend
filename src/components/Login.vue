@@ -80,6 +80,19 @@ export default {
   align-items: center;
   padding: 2rem 2rem 4rem 2rem;
   z-index: 1;
+  animation: fadeInUp 0.6s ease-out both;
+  will-change: opacity, transform;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .login-card {

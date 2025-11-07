@@ -6,10 +6,12 @@
   padding: 0;
   font-weight: normal;
   background:
-    radial-gradient(circle at 20% 30%, rgba(254, 181, 3, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(135, 104, 200, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 50% 90%, rgba(169, 74, 102, 0.06) 0%, transparent 50%),
-    linear-gradient(180deg, #fef9f0 0%, #f8f3ea 50%, #fdf5e8 100%);
+    radial-gradient(circle at 20% 30%, rgba(254, 181, 3, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(135, 104, 200, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 50% 90%, rgba(169, 74, 102, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 10% 80%, rgba(61, 93, 126, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 90% 20%, rgba(254, 181, 3, 0.08) 0%, transparent 45%),
+    linear-gradient(180deg, #fef9f0 0%, #fef5eb 25%, #fff2e8 50%, #fdf5e8 75%, #fef8f1 100%);
   min-height: 100vh;
   position: relative;
 }
@@ -22,10 +24,38 @@
   right: 0;
   bottom: 0;
   background-image:
-    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(135, 104, 200, 0.02) 2px, rgba(135, 104, 200, 0.02) 4px),
-    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(135, 104, 200, 0.02) 2px, rgba(135, 104, 200, 0.02) 4px);
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(135, 104, 200, 0.03) 2px, rgba(135, 104, 200, 0.03) 4px),
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(254, 181, 3, 0.02) 2px, rgba(254, 181, 3, 0.02) 4px);
   pointer-events: none;
   z-index: 0;
+}
+
+#app::after {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(135, 104, 200, 0.06) 0%, transparent 25%),
+    radial-gradient(circle at 70% 60%, rgba(254, 181, 3, 0.05) 0%, transparent 25%),
+    radial-gradient(circle at 50% 80%, rgba(169, 74, 102, 0.04) 0%, transparent 25%);
+  animation: slowFloat 30s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes slowFloat {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(3%, 3%) rotate(1deg);
+  }
+  66% {
+    transform: translate(-3%, 2%) rotate(-1deg);
+  }
 }
 
 #app > * {
@@ -282,7 +312,11 @@ a button {
 }
 
 body {
-  background: linear-gradient(180deg, #fef9f0 0%, #fdf5e8 100%);
+  background:
+    radial-gradient(circle at 15% 20%, rgba(135, 104, 200, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(254, 181, 3, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(169, 74, 102, 0.05) 0%, transparent 50%),
+    linear-gradient(180deg, #fef9f0 0%, #fdf5e8 100%);
   color: #1a1a1a;
 }
 
