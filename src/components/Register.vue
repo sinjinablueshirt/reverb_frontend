@@ -1,5 +1,13 @@
 <template>
   <div class="register-container">
+    <!-- Loading Overlay -->
+    <div v-if="isLoading" class="loading-overlay">
+      <div class="loading-modal">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Creating your account...</p>
+      </div>
+    </div>
+
     <div class="register-card">
       <div class="register-header">
         <div class="icon-wrapper">
@@ -17,6 +25,7 @@
             v-model="username"
             placeholder="Choose a username"
             required
+            :disabled="isLoading"
           />
         </div>
         <div class="input-group">
@@ -27,6 +36,7 @@
             v-model="password"
             placeholder="Create a password"
             required
+            :disabled="isLoading"
           />
         </div>
         <div class="input-group">
@@ -37,9 +47,10 @@
             v-model="confirmPassword"
             placeholder="Re-enter your password"
             required
+            :disabled="isLoading"
           />
         </div>
-        <button type="submit" class="register-button">
+        <button type="submit" class="register-button" :disabled="isLoading">
           <span class="button-text">Create Account</span>
           <span class="button-icon">→</span>
         </button>
@@ -65,7 +76,8 @@ export default {
       username: '',
       password: '',
       confirmPassword: '',
-      localError: ''
+      localError: '',
+      isLoading: false
     }
   },
   computed: {
@@ -89,16 +101,20 @@ export default {
         return
       }
 
-      await this.register(this.username, this.password)
-      const authStore = useAuthStore()
-      if (authStore.user && !authStore.error) {
-        this.$router.push('/')
+      this.isLoading = true
+      try {
+        await this.register(this.username, this.password)
+        const authStore = useAuthStore()
+        if (authStore.user && !authStore.error) {
+          this.$router.push('/')
+        }
+      } finally {
+        this.isLoading = false
       }
     }
   }
 }
 </script>
-
 <style scoped>
 .register-container {
   position: relative;
@@ -413,5 +429,81 @@ export default {
 
 .login-link a:hover::after {
   width: 100%;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.loading-modal {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+  padding: 3rem;
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+}
+
+.loading-modal::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(135deg, #feb503, #a94a66, #8768c8);
+  border-radius: 24px;
+  z-index: -1;
+  opacity: 0.6;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(254, 181, 3, 0.2);
+  border-top: 4px solid #feb503;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #feb503, #a94a66);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 </style>

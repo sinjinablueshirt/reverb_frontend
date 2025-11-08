@@ -110,7 +110,7 @@ export const useAuthStore = defineStore('auth', {
     async logout() {
       try {
         if (this.session) {
-          await fetch(`${API_BASE}/UserAuthentication/logout`, {
+          await fetch(`${API_BASE}/logout`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ session: this.session }),

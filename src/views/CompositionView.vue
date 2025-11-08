@@ -74,29 +74,39 @@
       <div class="comments-section">
         <h2>Feedback</h2>
 
+        <!-- Comment Submission Loading Overlay -->
+        <div v-if="isSubmittingComment" class="comment-loading-overlay">
+          <div class="comment-loading-modal">
+            <div class="comment-loading-spinner"></div>
+            <p class="comment-loading-text">Submitting feedback...</p>
+          </div>
+        </div>
+
         <!-- Add Comment Form -->
         <div v-if="authStore.user" class="add-comment">
           <textarea
             v-model="newCommentText"
             placeholder="Leave your feedback here..."
             rows="4"
+            :disabled="isSubmittingComment"
           ></textarea>
           <div class="tag-input-row">
             <textarea
               v-model="newCommentTags"
               placeholder="Enter tags (comma-separated)..."
               rows="2"
+              :disabled="isSubmittingComment"
             ></textarea>
             <button
               @click="suggestTags"
-              :disabled="!newCommentText.trim() || suggestingTags"
+              :disabled="!newCommentText.trim() || suggestingTags || isSubmittingComment"
               class="suggest-btn"
             >
               {{ suggestingTags ? 'Suggesting...' : 'Suggest Tags' }}
             </button>
           </div>
           <div v-if="suggestTagsError" class="suggest-tags-error">{{ suggestTagsError }}</div>
-          <button @click="submitComment" :disabled="!newCommentText.trim()">
+          <button @click="submitComment" :disabled="!newCommentText.trim() || isSubmittingComment">
             Submit Feedback
           </button>
           <div v-if="commentStore.error" class="error">{{ commentStore.error }}</div>
@@ -165,6 +175,7 @@ const compositionOwnerName = ref('');
 const isPublic = ref(false);
 const isOwner = ref(false);
 const isDeleting = ref(false);
+const isSubmittingComment = ref(false);
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 const loadComposition = async () => {
@@ -213,18 +224,23 @@ const submitComment = async () => {
     .map(tag => tag.trim())
     .filter(tag => tag.length > 0);
 
-  await commentStore.addComment(compositionId, newCommentText.value, tags);
+  isSubmittingComment.value = true;
+  try {
+    await commentStore.addComment(compositionId, newCommentText.value, tags);
 
-  if (!commentStore.error) {
-    newCommentText.value = '';
-    newCommentTags.value = '';
-    // Reload comments to get the latest
-    await commentStore.fetchComments(compositionId);
+    if (!commentStore.error) {
+      newCommentText.value = '';
+      newCommentTags.value = '';
+      // Reload comments to get the latest
+      await commentStore.fetchComments(compositionId);
 
-    // Load usernames for new commenters
-    for (const comment of commentStore.comments) {
-      await loadUserName(comment.commenter);
+      // Load usernames for new commenters
+      for (const comment of commentStore.comments) {
+        await loadUserName(comment.commenter);
+      }
     }
+  } finally {
+    isSubmittingComment.value = false;
   }
 };
 
@@ -982,6 +998,60 @@ watch(() => route.params.id, loadComposition);
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.6; }
+}
+
+/* Comment Submission Loading Overlay */
+.comment-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(61, 93, 126, 0.15);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+.comment-loading-modal {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 252, 0.98));
+  padding: 2rem 3rem;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(135, 104, 200, 0.25);
+  border: 2px solid rgba(135, 104, 200, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+.comment-loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(135, 104, 200, 0.2);
+  border-top: 4px solid #8768c8;
+  border-right: 4px solid #a94a66;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+.comment-loading-text {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #8768c8, #a94a66);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Responsive design for smaller screens */
