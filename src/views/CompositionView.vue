@@ -7,6 +7,24 @@
       <div class="floating-circle circle-4"></div>
       <div class="floating-circle circle-5"></div>
     </div>
+
+    <!-- Comment Submission Loading Overlay (moved to top level) -->
+    <div v-if="isSubmittingComment" class="comment-loading-overlay">
+      <div class="comment-loading-modal">
+        <div class="comment-loading-spinner"></div>
+        <p class="comment-loading-text">Submitting feedback...</p>
+      </div>
+    </div>
+
+    <!-- Delete Loading Overlay -->
+    <div v-if="isDeleting" class="delete-overlay">
+      <div class="delete-modal">
+        <div class="delete-spinner"></div>
+        <p class="delete-text">Deleting composition...</p>
+        <p class="delete-subtext">Please wait while we remove all data.</p>
+      </div>
+    </div>
+
     <div class="content-wrapper">
       <!-- Left Info Section -->
       <div class="info-section">
@@ -61,26 +79,9 @@
         </div>
       </div>
 
-      <!-- Delete Loading Overlay -->
-      <div v-if="isDeleting" class="delete-overlay">
-        <div class="delete-modal">
-          <div class="delete-spinner"></div>
-          <p class="delete-text">Deleting composition...</p>
-          <p class="delete-subtext">Please wait while we remove all data.</p>
-        </div>
-      </div>
-
       <!-- Comments Section -->
       <div class="comments-section">
         <h2>Feedback</h2>
-
-        <!-- Comment Submission Loading Overlay -->
-        <div v-if="isSubmittingComment" class="comment-loading-overlay">
-          <div class="comment-loading-modal">
-            <div class="comment-loading-spinner"></div>
-            <p class="comment-loading-text">Submitting feedback...</p>
-          </div>
-        </div>
 
         <!-- Add Comment Form -->
         <div v-if="authStore.user" class="add-comment">
@@ -1002,18 +1003,17 @@ watch(() => route.params.id, loadComposition);
 
 /* Comment Submission Loading Overlay */
 .comment-loading-overlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(61, 93, 126, 0.15);
-  backdrop-filter: blur(4px);
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
-  border-radius: 16px;
+  z-index: 1000;
   animation: fadeIn 0.2s ease;
 }
 
